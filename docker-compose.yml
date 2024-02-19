@@ -1,0 +1,62 @@
+version: '3'
+
+networks:
+  laravel-app:
+    driver: bridge
+
+services:
+  php-fpm:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    container_name: laravel-php
+    ports:
+      - '9000:9000'
+    volumes:
+      - F:/code:/var/www/html
+    restart: always
+    networks:
+      - default
+      - laravel-app  
+
+  nginx:
+    image: nginx:latest
+    container_name: laravel-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d
+      - F:/code:/var/www/html
+    restart: always
+    networks:
+      - default
+      - laravel-app  
+
+        
+  mysql:
+    image: mysql:8.3.0
+    container_name: laravel-mysql
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci #设置utf8字符集
+    restart: always
+    ports:
+      - "3306:3306"  # host物理直接映射端口为3306
+    environment:
+      MYSQL_ROOT_PASSWORD: 'secret' # root管理员用户密码
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - default
+      - laravel-app  
+
+        
+  redis:
+    image: redis:6.0.6
+    container_name: laravel-redis # 容器名
+    restart: always
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./redis:/data
+    networks:
+      - default
+      - laravel-app  
